@@ -3,7 +3,6 @@ services:
     name: emberwatch
     runtime: node
     plan: free
-    region: singapore
     buildCommand: npm ci --include=dev && npm run build
     startCommand: npm start
     healthCheckPath: /readyz

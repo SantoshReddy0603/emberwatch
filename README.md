@@ -157,9 +157,9 @@ Set `SIM_EMBEDDED=1` in `.env` for this mode, then open [http://127.0.0.1:4000](
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/SantoshReddy0603/emberwatch)
 
-`render.yaml` runs the API, the built client, and the embedded simulator as one free web service in Singapore.
+`render.yaml` runs the API, the built client, and the embedded simulator as one free web service.
 
-1. Create a free MongoDB Atlas cluster in AWS Singapore (`ap-southeast-1`) without the sample dataset. Add a database user, allow network access from `0.0.0.0/0`, and copy the `mongodb+srv://` connection string with `/emberwatch` before the query string.
+1. Create a free MongoDB Atlas cluster in the AWS region closest to your Render service region, without the sample dataset. Add a database user, allow network access from `0.0.0.0/0`, and copy the `mongodb+srv://` connection string with `/emberwatch` before the query string.
 2. In Render choose **New → Blueprint**, select this repository, and paste the connection string into `MONGO_URI`.
 3. Apply. Render generates `JWT_SECRET` and `FLEET_SECRET`, the server provisions the fleet and demo accounts on boot (`SEED_ON_START=1`), and CORS defaults to the assigned `onrender.com` URL.
 
