@@ -14,3 +14,5 @@ CLAUDE.md
 AGENTS.md
 .build/
 bench/results/*.json
+docs/DEMO.md
+docs/DEPLOYMENT.md

@@ -1,0 +1,60 @@
+@startuml
+title EmberWatch | Ingestion, alerting, and history/live merge
+skinparam backgroundColor #F8FAFC
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam ArrowColor #475569
+skinparam sequenceMessageAlign center
+
+actor "Virtual gateway" as Gateway
+participant "Express /devices" as Ingest
+participant "Ingestor + live state" as State
+participant "Anomaly engine" as Anomaly
+participant "Bounded batch writer" as Writer
+database "MongoDB" as DB
+participant "Socket.IO /live" as Socket
+actor "Authorized dashboard" as Client
+participant "History API" as History
+
+== Telemetry ingestion ==
+Gateway -> Ingest : Authenticated batch\n(sid, seq, ts, metrics)
+Ingest -> State : Validate, rate-limit,\ncheck source and sequence
+alt invalid, duplicate, or overloaded
+  State --> Ingest : Reject / duplicate / retryAfterMs
+  Ingest --> Gateway : ACK with counts and backoff
+else accepted event
+  State -> State : Update latest state only\nfor newer sequence
+  State -> Writer : Enqueue reading
+  State -> Anomaly : Evaluate EWMA, thresholds,\ndwell and fresh neighbours
+  opt incident transition
+    Anomaly -> DB : Persist / update incident
+    Anomaly -> Socket : Reliable scoped alert
+    Socket --> Client : Alert for authorized zone
+  end
+  Ingest --> Gateway : Queued-acceptance ACK
+end
+
+group Periodic persistence and live delivery
+  Writer -> DB : insertMany batch\n(about every 500 ms)
+  DB --> Writer : Write result
+  State -> Socket : Changed-source deltas\n(about every 250 ms)
+  Socket --> Client : Volatile, room-scoped frame
+end
+
+== Historical view joined to live updates ==
+Client -> Socket : Subscribe to authorized zone/source
+Socket --> Client : Snapshot + active incidents
+Client -> History : Request time range
+History -> DB : Read raw events / minute rollups\nwith sequence cursor
+DB --> History : Persisted history
+History --> Client : Points + lastSeq watermark
+Client -> Client : Merge buffered live points\nby sequence; cap and downsample
+Socket --> Client : Continue live deltas
+
+note over Gateway,DB
+  The ACK confirms bounded in-memory queue admission,
+  not durable commit. A process crash can lose queued data.
+  MongoDB's unique (sid, seq) index is the persistence
+  dedupe boundary; volatile telemetry may be coalesced.
+end note
+@enduml

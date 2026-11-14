@@ -1,0 +1,92 @@
+@startuml
+title EmberWatch | Persisted data model
+hide methods
+skinparam backgroundColor #F8FAFC
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam classAttributeIconSize 0
+skinparam ArrowColor #475569
+skinparam class {
+  BackgroundColor #E0F2FE
+  BorderColor #0284C7
+}
+skinparam database {
+  BackgroundColor #DCFCE7
+  BorderColor #16A34A
+}
+
+class User <<MongoDB>> {
+  email : unique
+  passwordHash
+  role : admin | ops | ranger
+  zones : string[]
+}
+
+class Device <<MongoDB>> {
+  _id : source ID
+  type : sensor | station
+  zone
+  lat, lng
+  gateway
+  neighbours : string[]
+  lastSeq
+  lastSeen
+}
+
+class Gateway <<MongoDB>> {
+  _id : gateway ID
+  keyHash
+  zone
+  lastSeen
+}
+
+class Reading <<MongoDB>> {
+  sid
+  seq
+  ts : source time
+  rx : receive time
+  t, h, s, co
+  ws, wd, b, rssi
+  fdi
+  UNIQUE (sid, seq)
+  TTL by rx
+}
+
+class Rollup1m <<MongoDB>> {
+  sid
+  zone
+  b : minute bucket
+  n : count
+  tSum, tMax
+  hSum, hMin
+  sSum, sMax
+  fdiMax
+  lastSeq
+  UNIQUE (sid, b)
+  TTL by b
+}
+
+class Alert <<MongoDB>> {
+  sid
+  zone
+  type, severity
+  state : open | ack | resolved
+  active
+  openedAt, updatedAt
+  ackBy, ackAt
+  timeline : bounded entries
+}
+
+Gateway "1" -- "0..*" Device : owns
+Device "1" -- "0..*" Reading : emits
+Device "1" -- "0..*" Rollup1m : summarized as
+Device "1" -- "0..*" Alert : triggers
+User ..> Device : authorized by zone
+User ..> Alert : acknowledges
+
+note bottom of Reading
+  Readings and rollups expire after configured
+  retention periods. TTL cleanup is asynchronous.
+  Users, devices, gateways and incidents persist.
+end note
+@enduml

@@ -1,118 +1,213 @@
-# EmberWatch
+<div align="center">
 
-## Overview
+# 🔥 EmberWatch
 
-EmberWatch monitors a simulated forest sensor mesh for early signs of wildfire. It brings live conditions, spatially confirmed anomalies, incident handling, and recent history into one control room. Administrators manage the simulation; operations staff monitor the whole forest; rangers receive only their assigned zones.
+### Real-time wildfire telemetry and early-warning simulation
 
-All telemetry is generated continuously by virtual devices with current timestamps. The Kaiser Ridge scenario and sensor locations are fictional. The underlying OpenStreetMap geography is real. No external wildfire feed or physical hardware is required.
+Monitor a virtual forest sensor network, investigate developing incidents, and watch authorized dashboards update live.
 
-## Setup and execution
+<img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f525/512.webp" width="54" alt="Animated fire emoji" />
 
-Use Node.js 22.12 or newer, npm, and MongoDB 7 or newer. Install from the repository root:
+[Overview](#-overview) • [Features](#-key-features) • [Architecture](#-architecture-diagrams) • [Tech stack](#-tech-stack) • [Getting started](#-getting-started) • [FAQs](#-faqs)
 
-```sh
+![Node.js](https://img.shields.io/badge/Node.js-22.12%2B-339933?logo=nodedotjs&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![Express](https://img.shields.io/badge/Express-5-111111?logo=express&logoColor=white)
+![Socket.IO](https://img.shields.io/badge/Socket.IO-4-010101?logo=socketdotio&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-7%2B-47A248?logo=mongodb&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-ESM-F7DF1E?logo=javascript&logoColor=black)
+
+</div>
+
+---
+
+## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f31f/512.webp" width="24" alt="Animated star emoji" /> Overview
+
+EmberWatch is a MERN-stack telemetry platform built around a simulated forest fire scenario. Virtual sensors and weather stations continuously report conditions to a Node.js and Express backend. The system analyzes readings, records incidents in MongoDB, and broadcasts relevant updates through Socket.IO to users authorized for each zone.
+
+The map uses real OpenStreetMap basemap tiles, but the **Kaiser Ridge Forest Block, sensor locations, zone boundaries, weather, and fire behavior are fictional or simulated**. EmberWatch is a demonstration—not a live wildfire detection, prediction, or public-safety system. It does not currently ingest external wildfire or weather feeds.
+
+---
+
+## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/26a1/512.webp" width="24" alt="Animated lightning emoji" /> Key Features
+
+<table>
+  <tr>
+    <td width="50%">
+      <h3>📡 Live sensor telemetry</h3>
+      420 virtual forest sensors, 8 weather stations, 8 gateways, and four independently subscribed zones.
+    </td>
+    <td width="50%">
+      <h3>🗺️ Interactive monitoring map</h3>
+      Leaflet map with sensor states, temperature/smoke heat layer, zone boundaries, wind, and simulated apparent-spread arrows.
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <h3>🚨 Explainable incident handling</h3>
+      Statistical baselines, thresholds, dwell and recovery hysteresis, nearby-sensor confirmation, offline detection, and acknowledge/resolve lifecycle.
+    </td>
+    <td>
+      <h3>🔌 Selective real-time updates</h3>
+      Authenticated Socket.IO zone and sensor rooms, compact changed-source frames, reliable alerts, reconnect snapshots, and bounded delivery queues.
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <h3>📈 History and replay</h3>
+      MongoDB raw readings and minute rollups, sequence-based history/live merge, chart pause, time ranges, and peak-preserving downsampling.
+    </td>
+    <td>
+      <h3>🧪 Scenario and resilience controls</h3>
+      Admin ignition, extinguishing, wind, rate, and chaos controls; validation, token buckets, backpressure, retries, and pipeline metrics.
+    </td>
+  </tr>
+</table>
+
+---
+
+## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f6e0_fe0f/512.webp" width="24" alt="Animated tools emoji" /> Architecture Diagrams
+
+These diagrams describe the **implemented simulated system**. The map and fire behavior are synthetic; the basemap is OpenStreetMap.
+
+### System architecture
+
+![EmberWatch system architecture](docs/diagrams/system-architecture.png)
+
+### Telemetry ingestion, alerting, and history/live flow
+
+![EmberWatch telemetry and history/live flow](docs/diagrams/telemetry-history-flow.png)
+
+### Persisted data model
+
+![EmberWatch persisted data model](docs/diagrams/data-model.png)
+
+---
+
+## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2699_fe0f/512.webp" width="24" alt="Animated gear emoji" /> Tech Stack
+
+| Area | Technologies |
+|---|---|
+| Frontend | React, Vite, Leaflet, uPlot, react-window, Lucide |
+| Backend | Node.js, Express, Socket.IO |
+| Database | MongoDB, Mongoose |
+| Validation and security | Zod, JWT, bcrypt, Helmet, CORS, token-bucket rate limits |
+| Testing and performance | Vitest, Supertest, MongoDB Memory Server, built-in load benchmark |
+
+---
+
+## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f4ca/512.webp" width="24" alt="Animated chart emoji" /> Telemetry and Real-Time Flow
+
+Each event carries a source ID, monotonic sequence number, event timestamp, and sensor metrics. Gateways authenticate and submit batches through Socket.IO or the HTTP ingestion endpoint. The server validates ownership and values, applies rate limits and deduplication, updates current state, evaluates incident rules, and queues persistence.
+
+Raw events are written to MongoDB in batches; minute rollups are rebuilt from persisted readings. Socket.IO sends compact, room-scoped changes at a UI-friendly cadence. The client subscribes before loading history, buffers overlapping live data, and merges by sequence number to avoid duplicate chart points.
+
+**Delivery boundary:** an ingestion acknowledgement confirms bounded in-memory queue acceptance, not a durable database commit. Telemetry frames may be coalesced under transport pressure; Socket.IO is not a durable event log.
+
+---
+
+## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f680/512.webp" width="24" alt="Animated rocket emoji" /> Getting Started
+
+### Prerequisites
+
+- Node.js 22.12 or newer and npm
+- MongoDB 7 or newer, or a MongoDB Atlas database
+
+### Install and configure
+
+From the repository root:
+
+```powershell
 npm ci
+Copy-Item .env.example .env
 ```
 
-Copy `.env.example` to `.env` (`Copy-Item .env.example .env` in PowerShell, or `cp .env.example .env` on macOS/Linux). Replace both secret placeholders with separate random strings of at least 32 characters. The server and standalone simulator must share `FLEET_SECRET`.
+Edit `.env`. Use separate random values of at least 32 characters for `JWT_SECRET` and `FLEET_SECRET`; the standalone simulator and server must share `FLEET_SECRET`. Keep `.env` private and never commit it. The example defaults are for local development only.
 
 Start a local development database in one terminal:
 
-```sh
+```powershell
 npm run db
 ```
 
-The helper downloads a real mongod on its first run and keeps its files in `~/.emberwatch/db`. Set `DEV_DB_PATH` and `DEV_DB_PORT` to use another directory/port; update `MONGO_URI` to match. An existing MongoDB or Atlas database also works.
+In another terminal, seed the demo accounts and start the API, simulator, and frontend:
 
-In a second terminal:
-
-```sh
+```powershell
 npm run seed
 npm run dev
 ```
 
-Open **http://127.0.0.1:5173**. The development command runs Express on 4000, the simulator, and Vite on 5173. Keep `SIM_EMBEDDED=0` in this mode to avoid running two simulators. Seeding provisions devices, gateways, and demo users; running it again updates their credentials from the current environment without clearing telemetry. Do not use `seed -- --reset` on data you need to retain.
+Open [http://127.0.0.1:5173](http://127.0.0.1:5173). The development setup runs Express on port 4000, the simulator separately, and Vite on port 5173. For an existing MongoDB/Atlas database, set `MONGO_URI` in `.env` instead of starting the local database helper.
 
-| Demo account           | Role          | Access                            |
-| ---------------------- | ------------- | --------------------------------- |
-| `admin@emberwatch.dev` | Administrator | All zones and simulation controls |
-| `ops@emberwatch.dev`   | Operations    | All zones and pipeline metrics    |
-| `north@emberwatch.dev` | Ranger        | North                             |
-| `east@emberwatch.dev`  | Ranger        | East                              |
-| `south@emberwatch.dev` | Ranger        | South and West                    |
+<details>
+  <summary><b>Local demo accounts</b></summary>
+  <p>Seeding creates <code>admin@emberwatch.dev</code>, <code>ops@emberwatch.dev</code>, <code>north@emberwatch.dev</code>, <code>east@emberwatch.dev</code>, and <code>south@emberwatch.dev</code> for Administrator, Operations, North ranger, East ranger, and South/West ranger access. The default local-only demo password is <code>ember-demo</code>; change <code>DEMO_PASSWORD</code> before seeding a publicly accessible deployment. Rangers are restricted to their assigned zones.</p>
+</details>
 
-The default password is `ember-demo`. One-click demo buttons use that default. After changing `DEMO_PASSWORD` and reseeding, sign in using the email/password form. Tokens stay in the current tab's session storage and expire after 12 hours by default (`JWT_TTL`).
+### Build and run one server
 
-For one process serving the built frontend, run `npm run build`, set `SIM_EMBEDDED=1`, then run `npm start`. Open **http://127.0.0.1:4000**. [Deployment instructions](docs/DEPLOYMENT.md) cover the supplied Render configuration and MongoDB setup.
-
-## Features
-
-- 420 forest sensors, 8 weather stations, 8 gateways, and 4 independently subscribed zones.
-- Dark control room with Canvas sensor map, temperature/smoke heat layer, wind information, and apparent-spread arrows.
-- Selected-source charts with live/raw-history merge, 15-minute to 24-hour ranges, chart pause, and peak-preserving downsampling.
-- EWMA and robust anomaly scores, hard thresholds, dwell/recovery hysteresis, neighboring-source confirmation, and offline detection.
-- Persistent open, acknowledged, and resolved incidents with bounded timelines. Acknowledging an incident does not clear its condition.
-- Administrator ignition, extinguishing, wind, rate, and chaos controls.
-- Zone history scrubber, searchable virtualized source list, virtualized incidents, and pipeline metrics.
-- Authenticated APIs and Socket.IO subscriptions with ranger zone isolation, validation, token buckets, and bounded queues.
-
-The 0–100 **fire danger index** is a Chandler-derived temperature/humidity composite with a wind adjustment. It is not the official Canadian Fire Weather Index, a fire probability, or a calibrated forecast. The cellular fire model and apparent-spread estimate describe this simulation; they are not measurements from an actual incident.
-
-## Tech stack
-
-MongoDB and Mongoose store readings, minute aggregates, incidents, users, and gateway credentials. Node.js with Express handles ingestion, authentication, history, and control. React renders the client; Socket.IO carries live telemetry. Leaflet, uPlot, and react-window keep map, charts, and large lists responsive. Vite builds the frontend. All workspaces use JavaScript.
-
-## Data generation and ingestion
-
-The simulator combines ambient weather, a cellular fire front, wind-driven smoke, sensor noise, and device failures. Sensor sequence numbers identify events across retries; stations report at up to 1 Hz. The default requested sensor rate is 2 Hz. Its 100 ms polling loop and jitter mean requested frequency and measured throughput can differ.
-
-Each gateway authenticates to `/devices` using a derived provisioning key, batches readings, buffers disconnections, and honors server backoff. Optional chaos injects duplicates, malformed humidity, reordering, and link interruptions. HTTP ingestion is also available at `POST /api/ingest` with `x-gateway-id` and `x-gateway-key` headers. An event has the form:
-
-```json
-{ "sid": "N-001", "seq": 123, "ts": 1794650000000, "m": { "t": 31.2, "h": 28, "s": 4.1 } }
+```powershell
+npm run build
+npm start
 ```
 
-Use a current millisecond timestamp when sending events. Validation checks source ownership, metrics, sequence values, clock skew, rate limits, and queue capacity. Older sequence readings can enter history without rolling back the live state. A MongoDB unique index on `(sid,seq)` provides persistent deduplication. Raw readings expire after 6 hours and minute aggregates after 24 hours by default; MongoDB TTL cleanup is asynchronous.
+Set `SIM_EMBEDDED=1` in `.env` for this mode, then open [http://127.0.0.1:4000](http://127.0.0.1:4000). Do not run a separate simulator at the same time.
 
-**An ingestion ACK confirms queued acceptance, not a durable database commit.** The writer batches inserts, retries transient errors, and reserves in-flight queue capacity. A process crash can lose acknowledged in-memory data. Rollups are rebuilt from unique persisted raw readings so duplicate retries do not inflate their counts. Limits above the configured source allowance are intentionally visible in metrics; this demo does not promise lossless ingestion during sustained overload.
+---
 
-## Real-time communication
+## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2699_fe0f/512.webp" width="24" alt="Animated gear emoji" /> Testing and Performance
 
-The authenticated `/live` namespace joins only authorized `zone:*`, `sensor:*`, and `alerts:*` rooms. Operations/admin users also receive metrics. Every 250 ms the server publishes compact changed-source rows, while the selected-source stream supplies full metrics. Each connection retains at most five latest unsent telemetry packets and coalesces superseded updates when its transport is busy. Alerts use reliable Socket.IO events; active alerts are refetched when subscribing or reconnecting.
-
-The client subscribes before fetching history, buffers overlap, and merges raw points by sequence number. Rollup charts remain minute aggregates while the current reading stays live. A 10, 000-point cap bounds client memory and is disclosed when a range is truncated. Two-second head messages repair missed latest-state deltas using snapshots. Database history updates and periodic refresh recover committed readings; bounded retries handle a concurrent history cut. Socket.IO is not a durable event log and the dashboard does not receive every ingested reading.
-
-See [architecture and protocol](docs/ARCHITECTURE.md) for schemas, data flow, and consistency boundaries.
-
-## Running and testing
+Run the test suites and frontend production build:
 
 ```sh
 npm test
 npm run build
+```
+
+The repository includes a real ingestion/storage/Socket.IO benchmark with synthetic clients:
+
+```sh
 npm run bench -- --clients 50 --hz 10 --seconds 30 --warmup 5 --output docs/perf/local-run.json
 ```
 
-Tests cover ingestion limits/deduplication, writer retries and shutdown, exact rollups, anomaly state transitions, authentication, ranger isolation, HTTP/polling/WebSocket integration, bounded telemetry delivery, and client history/reconnect consistency. Integration tests and the benchmark launch isolated temporary databases; their first run downloads mongod. They require permission to bind/connect to local ports.
+One recorded local run accepted about **1,886 readings/second** with **50 synthetic Socket.IO clients** connected. This is a result from one shared Windows development machine—not a hosted capacity guarantee or a test of 50 fully rendered browsers. The benchmark report documents client-latency measurement, CPU, storage reconciliation, and other limitations: [performance methodology and results](docs/perf/README.md).
 
-The benchmark uses real ingestion, storage, and Socket.IO clients; it exits unsuccessfully if map frames are absent, clients disconnect, scope leaks, writes fail, or final persistence does not reconcile. [Measured results and conditions](docs/perf/README.md) distinguish requested rate, accepted events, sampled client latency, and graceful-drain verification. Use `--chaos` to exercise faulty links and events. This synthetic same-host test does not replace a distributed capacity test.
+---
 
-Follow the [four-minute demonstration](docs/DEMO.md) to show separate administrator and ranger sessions, ignition, acknowledgment, history, and metrics.
+## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2753/512.webp" width="24" alt="Animated question mark emoji" /> FAQs
 
-## External resources and attribution
+<details>
+  <summary><b>Are these real sensors or an active California fire?</b></summary>
+  <p>No. Sensor locations, readings, zones, weather, and fire behavior are generated for a fictional scenario. The basemap geography and map tiles are from OpenStreetMap. No external fire or weather feed is currently connected.</p>
+</details>
 
-| Resource                                                                                                                                                                                                                    | Use                                                                      |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| [Node.js](https://nodejs.org/), [Express](https://expressjs.com/), [MongoDB](https://www.mongodb.com/), [Mongoose](https://mongoosejs.com/)                                                                                 | Runtime, HTTP server, database, modeling                                 |
-| [React and React DOM](https://react.dev/), [Vite](https://vite.dev/), [React Vite plugin](https://github.com/vitejs/vite-plugin-react)                                                                                      | Interface, development, production build                                 |
-| [Socket.IO and socket.io-client](https://socket.io/)                                                                                                                                                                        | Device and dashboard communication                                       |
-| [Zod](https://zod.dev/), [express-rate-limit](https://github.com/express-rate-limit/express-rate-limit)                                                                                                                     | Validation and request limits                                            |
-| [bcryptjs](https://github.com/dcodeIO/bcrypt.js), [jsonwebtoken](https://github.com/auth0/node-jsonwebtoken)                                                                                                                | Password hashing and session tokens                                      |
-| [Helmet](https://helmetjs.github.io/), [cors](https://github.com/expressjs/cors), [Pino](https://getpino.io/)                                                                                                               | HTTP headers, CORS, structured logs                                      |
-| [Leaflet](https://leafletjs.com/), [uPlot](https://github.com/leeoniya/uPlot), [react-window](https://github.com/bvaughn/react-window), [Lucide](https://lucide.dev/)                                                       | Map, plots, virtual lists, icons                                         |
-| [OpenStreetMap contributors](https://www.openstreetmap.org/copyright)                                                                                                                                                       | Basemap data and standard map tiles; attribution also appears on the map |
-| [DM Sans](https://fonts.google.com/specimen/DM+Sans), [IBM Plex Mono](https://fonts.google.com/specimen/IBM+Plex+Mono)                                                                                                      | Optional Google Fonts, with local system fallbacks                       |
-| [Vitest](https://vitest.dev/), [Supertest](https://github.com/ladjs/supertest), [MongoDB Memory Server](https://github.com/typegoose/mongodb-memory-server), [concurrently](https://github.com/open-cli-tools/concurrently) | Tests, local database helper, development commands                       |
+<details>
+  <summary><b>Does the fire danger index predict a real wildfire?</b></summary>
+  <p>No. It is a simulation-oriented composite based on temperature, humidity, and a wind adjustment. It is not the official Canadian Fire Weather Index, a calibrated forecast, or evacuation guidance.</p>
+</details>
 
-Standard OpenStreetMap tiles require an internet connection and follow the [OSMF tile usage policy](https://operations.osmfoundation.org/policies/tiles/); no bulk tile downloading is implemented. `VITE_TILE_URL` and `VITE_TILE_ATTRIBUTION` can select another properly licensed provider at build time; allow its image origin in the server CSP as well. Provider-specific keys are only needed if that chosen provider requires them.
+<details>
+  <summary><b>Does every incoming reading reach every browser?</b></summary>
+  <p>No. Clients subscribe to authorized zones and selected sources. Frequent telemetry is compacted or coalesced to protect responsiveness; persisted history and sequence-based merging provide the historical record.</p>
+</details>
 
-The composite danger calculation is documented in [shared/metrics.js](shared/metrics.js). Its base follows the Chandler Burning Index described in Chandler et al., _Fire in Forestry_, 1983; the wind adjustment and 0–100 display are specific to this application.
+<details>
+  <summary><b>Where does the map data come from?</b></summary>
+  <p>The map uses standard OpenStreetMap tiles, which require an internet connection and must retain visible attribution. See the <a href="https://operations.osmfoundation.org/policies/tiles/">OpenStreetMap tile usage policy</a>.</p>
+</details>
+
+---
+
+## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f4da/512.webp" width="24" alt="Animated books emoji" /> Attribution
+
+- **OpenStreetMap contributors** provide the basemap data; attribution is shown on the map. Standard tiles follow the [OSMF tile usage policy](https://operations.osmfoundation.org/policies/tiles/).
+- **Chandler Burning Index** is the basis for the temperature/humidity component of the app-specific danger score: Chandler et al., *Fire in Forestry* (1983). EmberWatch's wind adjustment and 0–100 display are application-specific.
+- Animated section icons use [Google Noto Emoji](https://github.com/googlefonts/noto-emoji), licensed under Apache 2.0.
+- EmberWatch uses the open-source libraries listed in the [tech stack](#-tech-stack); their licenses and notices are provided by their respective projects and package metadata.
+
+---
+
+<div align="center">
+  <p>Built with <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f9e1/512.webp" width="18" alt="Animated heart emoji" /> for the MERNIFY real-time telemetry challenge</p>
+  <b>See the signal. Understand the incident.</b>
+</div>

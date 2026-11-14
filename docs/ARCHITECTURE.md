@@ -1,5 +1,7 @@
 # Architecture
 
+Rendered PlantUML system, flow, and persistence diagrams are embedded in the [README](../README.md#-architecture-diagrams). Editable `.puml` sources and PNG renders are kept together in `docs/diagrams/`. They describe the current simulated implementation.
+
 ```mermaid
 flowchart LR
   W[Cellular fire and weather world] --> G[8 virtual gateways]
