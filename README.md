@@ -39,7 +39,7 @@ The map uses real OpenStreetMap basemap tiles, but the **Kaiser Ridge Forest Blo
     </td>
     <td width="50%">
       <h3>🗺️ Interactive monitoring map</h3>
-      Leaflet map with sensor states, temperature/smoke heat layer, zone boundaries, wind, and simulated apparent-spread arrows.
+      Leaflet map with sensor states, temperature/smoke heat layer, zone boundaries, wind, and one simulated fire-front arrow per zone (direction, apparent speed, and sensor count).
     </td>
   </tr>
   <tr>
@@ -152,6 +152,18 @@ npm start
 ```
 
 Set `SIM_EMBEDDED=1` in `.env` for this mode, then open [http://127.0.0.1:4000](http://127.0.0.1:4000). Do not run a separate simulator at the same time.
+
+### Deploy to Render
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/SantoshReddy0603/emberwatch)
+
+`render.yaml` runs the API, the built client, and the embedded simulator as one free web service in Singapore.
+
+1. Create a free MongoDB Atlas cluster in AWS Singapore (`ap-southeast-1`) without the sample dataset. Add a database user, allow network access from `0.0.0.0/0`, and copy the `mongodb+srv://` connection string with `/emberwatch` before the query string.
+2. In Render choose **New → Blueprint**, select this repository, and paste the connection string into `MONGO_URI`.
+3. Apply. Render generates `JWT_SECRET` and `FLEET_SECRET`, the server provisions the fleet and demo accounts on boot (`SEED_ON_START=1`), and CORS defaults to the assigned `onrender.com` URL.
+
+The hosted simulator runs at 1 Hz with 60 minutes of raw retention so storage stays within the 512 MB free tier. Free services sleep after about 15 minutes idle and take up to a minute to wake.
 
 ---
 
