@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: emberwatch
+    runtime: node
+    plan: free
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /readyz
+    envVars:
+      - key: NODE_VERSION
+        value: '22'
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: FLEET_SECRET
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: DEMO_PASSWORD
+        sync: false
+      - key: SIM_EMBEDDED
+        value: '1'
+      - key: SIM_HZ
+        value: '2'
