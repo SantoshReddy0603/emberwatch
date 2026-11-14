@@ -20,12 +20,15 @@ export const config = {
   fleetSecret: secret('FLEET_SECRET', 'dev-only-fleet-secret'),
   corsOrigins: (
     process.env.CORS_ORIGINS ||
+    process.env.RENDER_EXTERNAL_URL ||
     'http://localhost:5173,http://127.0.0.1:5173,http://localhost:4000,http://127.0.0.1:4000'
   )
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean),
   demoPassword: process.env.DEMO_PASSWORD || 'ember-demo',
+  // Provision fleet, gateways and demo accounts on boot (idempotent upserts)
+  seedOnStart: process.env.SEED_ON_START === '1',
 
   // Retention
   rawTtlMinutes: num(process.env.RAW_TTL_MINUTES, 360),

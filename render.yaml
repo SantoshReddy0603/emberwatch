@@ -3,6 +3,7 @@ services:
     name: emberwatch
     runtime: node
     plan: free
+    region: singapore
     buildCommand: npm ci --include=dev && npm run build
     startCommand: npm start
     healthCheckPath: /readyz
@@ -16,14 +17,20 @@ services:
       - key: MONGO_URI
         sync: false
       - key: JWT_SECRET
-        sync: false
+        generateValue: true
       - key: FLEET_SECRET
-        sync: false
-      - key: CORS_ORIGINS
-        sync: false
+        generateValue: true
       - key: DEMO_PASSWORD
-        sync: false
+        value: ember-demo
+      - key: SEED_ON_START
+        value: '1'
       - key: SIM_EMBEDDED
         value: '1'
       - key: SIM_HZ
-        value: '2'
+        value: '1'
+      - key: RAW_TTL_MINUTES
+        value: '60'
+      - key: ROLLUP_TTL_HOURS
+        value: '24'
+      - key: MONGOMS_DISABLE_POSTINSTALL
+        value: '1'

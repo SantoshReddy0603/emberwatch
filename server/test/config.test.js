@@ -38,4 +38,32 @@ describe('production configuration', () => {
   it('accepts explicit production secrets', () => {
     expect(load({}).status).toBe(0);
   });
+  it('uses the Render public URL as the allowed origin when none is configured', () => {
+    const origins = (env) =>
+      spawnSync(
+        process.execPath,
+        [
+          '--input-type=module',
+          '-e',
+          "const { config } = await import('./server/src/config.js'); console.log(config.corsOrigins.join(' '))",
+        ],
+        {
+          cwd: project,
+          env: {
+            ...process.env,
+            NODE_ENV: 'production',
+            JWT_SECRET: 'a'.repeat(48),
+            FLEET_SECRET: 'b'.repeat(48),
+            CORS_ORIGINS: '',
+            ...env,
+          },
+          encoding: 'utf8',
+        },
+      ).stdout.trim();
+    expect(origins({ RENDER_EXTERNAL_URL: 'https://emberwatch.onrender.com' })).toBe(
+      'https://emberwatch.onrender.com',
+    );
+    const both = { RENDER_EXTERNAL_URL: 'https://emberwatch.onrender.com', CORS_ORIGINS: 'https://a.example' };
+    expect(origins(both)).toBe('https://a.example');
+  });
 });

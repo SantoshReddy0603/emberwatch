@@ -478,11 +478,16 @@ small {
   opacity: 0.8;
 }
 .spread-label {
+  position: absolute;
   color: #fff;
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
-  text-shadow: 0 1px 4px #000;
+  background: rgba(10, 10, 12, 0.82);
+  border: 1px solid #393941;
+  border-radius: 6px;
+  padding: 3px 7px;
+  transform: translate(-50%, -50%);
 }
 .sensor-tooltip {
   background: #16161c !important;

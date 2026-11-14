@@ -9,6 +9,12 @@ import { log } from './obs/log.js';
 
 await connectDb();
 
+if (config.seedOnStart) {
+  const { seed } = await import('./seed.js');
+  const res = await seed();
+  log.info(res, 'seeded fleet and demo accounts');
+}
+
 const httpServer = http.createServer((req, res) => app(req, res));
 const io = new Server(httpServer, {
   cors: { origin: config.corsOrigins },

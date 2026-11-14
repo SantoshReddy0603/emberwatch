@@ -75,6 +75,9 @@ export class GatewayClient {
       this.stats.connectErrors++;
       this.stats.lastError = err.message;
     });
+    this.socket.on('connect', () => {
+      this.stats.lastError = null;
+    });
     this.timer = setInterval(() => this.tick(), 100);
     this.flapTimer = setInterval(() => this.maybeFlap(), 15000);
   }

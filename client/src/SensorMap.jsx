@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { REGION, ZONES, toXY, fromXY, compass } from '@emberwatch/shared';
+import { REGION, ZONES, fromXY, compass } from '@emberwatch/shared';
+import { fireFronts } from './fireFront.js';
 
 export const STATUS_COLORS = ['#71717a', '#eab308', '#ef4444', '#3f3f46'];
 
@@ -173,17 +174,10 @@ export default function SensorMap({
       else marker.bindTooltip(tooltip, { direction: 'top', className: 'sensor-tooltip' });
     }
     arrows.current.clearLayers();
-    for (const alert of alerts
-      .filter(
-        (a) =>
-          a.type === 'ignition' && a.state !== 'resolved' && Number.isFinite(a.spread?.bearing),
-      )
-      .slice(0, 12)) {
-      const st = devices.find((d) => d.id === alert.sid);
-      if (!st) continue;
-      const p = toXY(st),
-        angle = (alert.spread.bearing * Math.PI) / 180,
-        length = 600;
+    for (const front of fireFronts(alerts, devices)) {
+      const p = front.centroid,
+        angle = (front.bearing * Math.PI) / 180,
+        length = 1400;
       const tip = { x: p.x + Math.sin(angle) * length, y: p.y + Math.cos(angle) * length };
       const end = fromXY(tip),
         start = fromXY(p);
@@ -209,10 +203,12 @@ export default function SensorMap({
         { color: '#fafafa', weight: 2, interactive: false },
       ).addTo(arrows.current);
       const label = document.createElement('span');
-      label.textContent = `Apparent spread ${compass(alert.spread.bearing)}${Number.isFinite(alert.spread.kmh) ? ` · ~${alert.spread.kmh} km/h` : ''}`;
-      L.marker([end.lat, end.lng], {
+      label.className = 'spread-label';
+      label.textContent = `Fire front ${compass(front.bearing)}${Number.isFinite(front.kmh) ? ` · ~${front.kmh} km/h` : ''} · ${front.sensors} ${front.sensors === 1 ? 'sensor' : 'sensors'}`;
+      const anchor = fromXY({ x: tip.x + Math.sin(angle) * 450, y: tip.y + Math.cos(angle) * 450 });
+      L.marker([anchor.lat, anchor.lng], {
         interactive: false,
-        icon: L.divIcon({ className: 'spread-label', html: label, iconSize: [190, 30] }),
+        icon: L.divIcon({ className: 'spread-anchor', html: label, iconSize: [0, 0] }),
       }).addTo(arrows.current);
     }
     drawHeat();

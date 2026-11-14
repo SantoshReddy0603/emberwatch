@@ -15,6 +15,9 @@ import { createApp } from '../src/app.js';
 import { Reading } from '../src/models/Reading.js';
 import { Rollup } from '../src/models/Rollup.js';
 import { Alert } from '../src/models/Alert.js';
+import { Device } from '../src/models/Device.js';
+import { Gateway } from '../src/models/Gateway.js';
+import { User } from '../src/models/User.js';
 import jwt from 'jsonwebtoken';
 
 process.env.MONGOMS_DOWNLOAD_DIR ||= resolve('../.data/mongodb-binaries');
@@ -66,6 +69,16 @@ afterAll(async () => {
 }, 60000);
 
 describe.sequential('authenticated application', () => {
+  it('re-seeds on restart without duplicating or resetting data', async () => {
+    const counts = () =>
+      Promise.all([Device.countDocuments(), Gateway.countDocuments(), User.countDocuments()]);
+    const before = await counts();
+    const devicesBefore = await Device.find({}, { lastSeq: 1 }).lean();
+    const res = await seed();
+    expect(await counts()).toEqual(before);
+    expect(before).toEqual([res.devices, res.gateways, res.users]);
+    expect(await Device.find({}, { lastSeq: 1 }).lean()).toEqual(devicesBefore);
+  });
   it('protects APIs and never returns password hashes', async () => {
     await request(app).get('/api/devices').expect(401);
     await request(app)
