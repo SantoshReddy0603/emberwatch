@@ -9,6 +9,7 @@ const alertSchema = new mongoose.Schema(
     type: { type: String, enum: ALERT_TYPES, required: true },
     severity: { type: String, enum: ['warning', 'critical'], required: true },
     state: { type: String, enum: ['open', 'ack', 'resolved'], default: 'open' },
+    active: { type: Boolean, default: true },
     title: String,
     detail: String,
     value: Number,
@@ -29,5 +30,6 @@ const alertSchema = new mongoose.Schema(
 alertSchema.index({ state: 1, openedAt: -1 });
 alertSchema.index({ zone: 1, openedAt: -1 });
 alertSchema.index({ sid: 1, openedAt: -1 });
+alertSchema.index({ sid: 1, type: 1 }, { unique: true, partialFilterExpression: { active: true } });
 
 export const Alert = mongoose.model('Alert', alertSchema);

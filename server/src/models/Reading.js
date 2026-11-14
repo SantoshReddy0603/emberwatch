@@ -17,6 +17,7 @@ const readingSchema = new mongoose.Schema(
     wd: Number,
     b: Number,
     rssi: Number,
+    fdi: Number,
   },
   { versionKey: false, collection: 'readings' },
 );

@@ -12,9 +12,9 @@ export function encodeRow(idx, st, frameTs) {
   return [
     idx,
     st.seq,
-    Math.round(st.t * 10),
-    Math.round(st.h),
-    Math.round(st.s ?? 0),
+    st.t == null ? null : Math.round(st.t * 10),
+    st.h == null ? null : Math.round(st.h),
+    st.s == null ? null : Math.round(st.s),
     st.fdi ?? 0,
     st.status ?? 0,
     frameTs - st.ts,
@@ -25,7 +25,7 @@ export function decodeRow(row, frameTs) {
   return {
     idx: row[ROW.IDX],
     seq: row[ROW.SEQ],
-    t: row[ROW.T] / 10,
+    t: row[ROW.T] == null ? null : row[ROW.T] / 10,
     h: row[ROW.H],
     s: row[ROW.S],
     fdi: row[ROW.FDI],

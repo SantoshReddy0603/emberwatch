@@ -74,6 +74,7 @@ export function createMetrics() {
     ingestLagMs,
     e2eMs,
     rejectReasons,
+    stop() { loop.disable(); },
     reject(reason, n = 1) {
       c.rejected.add(n);
       rejectReasons[reason] = (rejectReasons[reason] || 0) + n;

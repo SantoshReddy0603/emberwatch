@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 import { config } from '../config.js';
 
-// One document per sensor per minute. Sums are stored instead of averages so
-// that partial flushes can be merged with $inc.
+// One document per sensor per minute, rebuilt from unique raw readings.
+// Sums retain the weights needed for zone averages across unequal counts.
 const rollupSchema = new mongoose.Schema(
   {
     sid: { type: String, required: true },

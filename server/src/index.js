@@ -9,7 +9,7 @@ import { log } from './obs/log.js';
 
 await connectDb();
 
-const httpServer = http.createServer();
+const httpServer = http.createServer((req, res) => app(req, res));
 const io = new Server(httpServer, {
   cors: { origin: config.corsOrigins },
   maxHttpBufferSize: 512 * 1024,
@@ -20,10 +20,9 @@ const io = new Server(httpServer, {
 
 const core = await createCore({ config, io });
 const app = createApp(core);
-httpServer.on('request', app);
 core.start();
 
-httpServer.listen(config.port, () => {
+httpServer.listen(config.port, config.host, () => {
   log.info({ port: config.port }, 'EmberWatch server listening');
 });
 

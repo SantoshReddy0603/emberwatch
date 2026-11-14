@@ -10,7 +10,7 @@ const dbPath = process.env.DEV_DB_PATH || join(homedir(), '.emberwatch', 'db');
 mkdirSync(dbPath, { recursive: true });
 
 const server = await MongoMemoryServer.create({
-  instance: { port: 27017, dbPath, storageEngine: 'wiredTiger', launchTimeout: 60000 },
+  instance: { port: Number(process.env.DEV_DB_PORT || 27017), dbPath, storageEngine: 'wiredTiger', launchTimeout: 120000 },
 });
 
 console.log(`MongoDB ready at ${server.getUri()} (data: ${dbPath})`);

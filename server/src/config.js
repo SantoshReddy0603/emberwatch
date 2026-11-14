@@ -3,6 +3,8 @@ const isProd = process.env.NODE_ENV === 'production';
 
 function secret(name, devDefault) {
   const v = process.env[name];
+  if (isProd && v && (v.length < 32 || /^(change-me|dev-only)/i.test(v)))
+    throw new Error(`${name} must contain at least 32 characters and cannot be a placeholder`);
   if (v) return v;
   if (isProd) throw new Error(`${name} must be set in production`);
   return devDefault;
@@ -11,11 +13,15 @@ function secret(name, devDefault) {
 export const config = {
   isProd,
   port: num(process.env.PORT, 4000),
+  host: process.env.HOST || (isProd ? '0.0.0.0' : '127.0.0.1'),
   mongoUri: process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/emberwatch',
   jwtSecret: secret('JWT_SECRET', 'dev-only-jwt-secret'),
   jwtTtl: process.env.JWT_TTL || '12h',
   fleetSecret: secret('FLEET_SECRET', 'dev-only-fleet-secret'),
-  corsOrigins: (process.env.CORS_ORIGINS || 'http://localhost:5173')
+  corsOrigins: (
+    process.env.CORS_ORIGINS ||
+    'http://localhost:5173,http://127.0.0.1:5173,http://localhost:4000,http://127.0.0.1:4000'
+  )
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean),

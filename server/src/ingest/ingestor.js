@@ -1,4 +1,4 @@
-import { readingSchema, batchSchema, MAX_CLOCK_SKEW_MS } from '@emberwatch/shared';
+import { readingSchema, batchSchema, MAX_CLOCK_SKEW_MS, fireDangerIndex } from '@emberwatch/shared';
 import { TokenBucket } from './tokenBucket.js';
 
 // Single entry point for telemetry, shared by the Socket.IO device namespace
@@ -49,7 +49,7 @@ export class Ingestor {
     metrics.c.received.add(batch.length, rx);
 
     // Load shedding: the write queue is full, refuse the whole batch.
-    if (writer.depth >= config.queueHardCap) {
+    if (writer.depth + batch.length > config.queueHardCap) {
       metrics.c.shed.add(batch.length, rx);
       return { ...res, ok: false, limited: batch.length, retryAfterMs: 2000, error: 'overloaded' };
     }
@@ -102,8 +102,8 @@ export class Ingestor {
       writer.push({
         sid: r.sid, seq: r.seq, ts: new Date(r.ts), rx: new Date(rx),
         t: m.t, h: m.h, s: m.s, co: m.co, ws: m.ws, wd: m.wd, b: m.b, rssi: m.rssi,
+        fdi: fireDangerIndex(m.t, m.h, m.ws ?? state.windFor(st)),
       });
-      this.rollups.add(st, r, state.windFor(st));
       metrics.ingestLagMs.add(Math.max(0, rx - r.ts));
 
       if (verdict === 'ooo') {

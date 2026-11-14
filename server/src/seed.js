@@ -10,6 +10,8 @@ import { User } from './models/User.js';
 import { Reading } from './models/Reading.js';
 import { Rollup } from './models/Rollup.js';
 import { Alert } from './models/Alert.js';
+import { pathToFileURL } from 'node:url';
+import { resolve } from 'node:path';
 
 export const DEMO_USERS = [
   { email: 'admin@emberwatch.dev', name: 'Riya Kapoor', role: 'admin', zones: [] },
@@ -62,7 +64,7 @@ export async function seed({ reset = false } = {}) {
   return { devices: fleet.devices.length, gateways: gateways.length, users: DEMO_USERS.length };
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   await connectDb();
   const res = await seed({ reset: process.argv.includes('--reset') });
   console.log(`Seeded ${res.devices} devices, ${res.gateways} gateways, ${res.users} users.`);
