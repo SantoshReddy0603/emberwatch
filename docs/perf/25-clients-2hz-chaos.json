@@ -1,0 +1,88 @@
+{
+  "measuredAt": "2026-11-14T12:02:48.890Z",
+  "environment": {
+    "platform": "win32 10.0.26300",
+    "node": "v22.19.0",
+    "cpu": "13th Gen Intel(R) Core(TM) i7-1360P",
+    "logicalCpus": 16,
+    "memoryGb": 15.69
+  },
+  "scenario": {
+    "sensors": 420,
+    "stations": 8,
+    "gateways": 8,
+    "clients": 25,
+    "requestedSensorHz": 2,
+    "stationHz": 1,
+    "chaos": true,
+    "warmupS": 5,
+    "elapsedS": 30.75,
+    "tickMs": 250,
+    "writeIntervalMs": 500,
+    "bucketRefillPerSec": 12,
+    "transport": "WebSocket; one zone and one sensor per client"
+  },
+  "throughput": {
+    "acceptedPerS": 763.1,
+    "writtenPerS": 754.28,
+    "receivedPerS": 774.28,
+    "counters": {
+      "received": 23811,
+      "accepted": 23467,
+      "duplicate": 242,
+      "outOfOrder": 0,
+      "rejected": 102,
+      "rateLimited": 0,
+      "shed": 0,
+      "written": 23196,
+      "writeErrors": 0,
+      "framesSent": 4839,
+      "framesSkipped": 0,
+      "bytesSent": 6814631,
+      "alerts": 0
+    }
+  },
+  "delivery": {
+    "clientsConnected": 25,
+    "framesReceived": 2443,
+    "rowsReceived": 142120,
+    "payloadBytes": 6814631,
+    "payloadBytesPerS": 221596.79,
+    "latencySamples": 9736,
+    "sampledClientLatencyMs": {
+      "p50": 262,
+      "p95": 1056,
+      "p99": 2065
+    },
+    "zoneViolations": 0,
+    "disconnects": 0
+  },
+  "resources": {
+    "peakQueue": 806,
+    "peakNodeRssMb": 131.21,
+    "processCpuCorePercent": 56.96,
+    "writeMs": {
+      "p50": 54.9,
+      "p95": 1019.3
+    },
+    "serverTickLatencyMs": {
+      "p50": 529,
+      "p95": 1124,
+      "p99": 1142
+    }
+  },
+  "persistence": {
+    "persisted": 27443,
+    "writtenCounter": 27443,
+    "remainingQueue": 0,
+    "reconciled": true
+  },
+  "limitations": [
+    "Single Windows host; server, simulator, and synthetic clients share one Node process. MongoDB is a separate temporary local process.",
+    "Concurrent host workloads are not isolated; record them alongside any published result.",
+    "Requested Hz is a setting, not measured throughput; the simulator polls every100ms and applies jitter.",
+    "Client latency samples the first four rows of each received delta; volatile frames coalesce readings. This does not measure delivery of every event.",
+    "Payload bytes exclude WebSocket/Socket.IO framing, TLS, and initial subscription snapshots. CPU/RSS exclude mongod and other processes.",
+    "ACK means queued acceptance. Final count reconciliation is a graceful-drain check, not crash-durability or a long-duration capacity guarantee."
+  ]
+}
