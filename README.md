@@ -33,6 +33,8 @@ The map uses real OpenStreetMap basemap tiles, but the **Kaiser Ridge Forest Blo
 
 ## Demo Accounts
 
+**Hosted app:** [https://emberwatch-opvc.onrender.com](https://emberwatch-opvc.onrender.com) (free Render instance; the first visit can take up to a minute while it wakes)
+
 The sign-in page has one-click buttons for every account under **Explore the simulation**, or sign in manually:
 
 | Role | Email | Password | What this account can do |
