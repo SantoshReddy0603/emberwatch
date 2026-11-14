@@ -8,5 +8,20 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4",
+    "lucide-react": "^1.73.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-window": "^2.5.3",
+    "socket.io-client": "^4.8.1",
+    "uplot": "^1.6.32",
+    "@emberwatch/shared": "1.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.3.0",
+    "vite": "^8.3.8",
+    "vitest": "^4.1.12"
   }
 }
